@@ -4,7 +4,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.is;
 
-public class reqresAPITests {
+public class ReqresAPITests {
     String baseUrl = "https://reqres.in/";
 
     @Test
@@ -59,7 +59,7 @@ public class reqresAPITests {
                 .body("job", is("QAA"));
     }
     @Test
-    void UnsuccessfulRegistrationMissingPasswordTest(){
+    void unsuccessfulRegistrationMissingPasswordTest(){
         String data = "{ \"email\": \"testemail@test.com\"}";
         given()
                 .log().uri()
@@ -76,7 +76,7 @@ public class reqresAPITests {
                 .body("error", is("Missing password"));
     }
     @Test
-    void UnsuccessfulRegistrationMissingEmailTest(){
+    void unsuccessfulRegistrationMissingEmailTest(){
         String data = "{ \"password\": \"pistol\"}";
         given()
                 .log().uri()
@@ -93,7 +93,7 @@ public class reqresAPITests {
                 .body("error", is("Missing email or username"));
     }
     @Test
-    void UnsuccessfulRegistrationUnvalidEmailTest(){
+    void unsuccessfulRegistrationUnvalidEmailTest(){
         String data = "{ \"email\": \"eve.holt\", \"password\": \"cityslicka\" }";
         given()
                 .log().uri()
