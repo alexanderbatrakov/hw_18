@@ -1,112 +1,125 @@
+import models.Create;
+import models.EmailAndPassword;
+import models.Error;
+import models.NameAndJob;
+import models.UserData;
 import org.junit.jupiter.api.Test;
 
+import static helpers.CustomApiListener.withCustomTemplates;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReqresAPITests {
-    String baseUrl = "https://reqres.in/";
 
     @Test
-    void singleUserTest(){
-        given()
-                .log().uri()
-                .baseUri(baseUrl)
-                .contentType(JSON)
+    void singleUserTest() {
+        String expectedEmail = "janet.weaver@reqres.in";
+        UserData data = given()
+                .spec(Spec.request)
+                .filter(withCustomTemplates())
                 .when()
-                .get("/api/users/2")
+                .get("/users/2")
                 .then()
-                .log().status()
-                .log().body()
+                .spec(Spec.response)
                 .statusCode(200)
-                .body("data.email", is("janet.weaver@reqres.in"));
+                .extract().as(UserData.class);
+        assertEquals(expectedEmail, data.getUser().getEmail());
     }
 
     @Test
-    void createTest(){
-        String data = "{ \"name\": \"Alex\", \"job\": \"QA\" }";
-        given()
-                .log().uri()
-                .log().body()
-                .baseUri(baseUrl)
-                .contentType(JSON)
-                .body(data)
+    void createTest() {
+        NameAndJob nameAndJob = new NameAndJob();
+        nameAndJob.setName("Alex");
+        nameAndJob.setJob("QA");
+        Create data = given()
+                .spec(Spec.request)
+                .filter(withCustomTemplates())
+                .body(nameAndJob)
                 .when()
-                .post("/api/users")
+                .post("/users")
                 .then()
-                .log().status()
-                .log().body()
+                .spec(Spec.response)
                 .statusCode(201)
-                .body("name", is("Alex"))
-                .body("job", is("QA"));
+                .extract().as(Create.class);
+        assertEquals(nameAndJob.getName(), data.getName());
+        assertEquals(nameAndJob.getJob(), data.getJob());
     }
+
     @Test
-    void updateTest(){
-        String data = "{ \"name\": \"Alex\", \"job\": \"QAA\" }";
-        given()
-                .log().uri()
-                .log().body()
-                .baseUri(baseUrl)
-                .contentType(JSON)
-                .body(data)
+    void updateTest() {
+        NameAndJob nameAndJob = new NameAndJob();
+        nameAndJob.setName("AlexAlex");
+        nameAndJob.setJob("QAA");
+        Create data = given()
+                .spec(Spec.request)
+                .filter(withCustomTemplates())
+                .body(nameAndJob)
                 .when()
-                .post("/api/users/943")
+                .post("/users")
                 .then()
-                .log().status()
-                .log().body()
+                .spec(Spec.response)
                 .statusCode(201)
-                .body("name", is("Alex"))
-                .body("job", is("QAA"));
+                .extract().as(Create.class);
+        assertEquals(nameAndJob.getName(), data.getName());
+        assertEquals(nameAndJob.getJob(), data.getJob());
     }
+
     @Test
-    void unsuccessfulRegistrationMissingPasswordTest(){
-        String data = "{ \"email\": \"testemail@test.com\"}";
-        given()
-                .log().uri()
-                .log().body()
-                .baseUri(baseUrl)
-                .contentType(JSON)
-                .body(data)
+    void unsuccessfulRegistrationMissingPasswordTest() {
+        String expectedError = "Missing email or username";
+        EmailAndPassword emailAndPassword = new EmailAndPassword();
+        emailAndPassword.setEmail("test@test.com");
+        Error data = given()
+                .spec(Spec.request)
+                .contentType("text/html; charset=utf-8")
+                .filter(withCustomTemplates())
+                .body(emailAndPassword.getEmail())
                 .when()
-                .post("/api/register")
+                .post("/register")
                 .then()
-                .log().status()
-                .log().body()
+                .spec(Spec.response)
                 .statusCode(400)
-                .body("error", is("Missing password"));
+                .extract().as(Error.class);
+        assertEquals(expectedError, data.getError());
     }
+
     @Test
-    void unsuccessfulRegistrationMissingEmailTest(){
-        String data = "{ \"password\": \"pistol\"}";
-        given()
-                .log().uri()
-                .log().body()
-                .baseUri(baseUrl)
-                .contentType(JSON)
-                .body(data)
+    void unsuccessfulRegistrationMissingEmailTest() {
+        String expectedError = "Missing email or username";
+        EmailAndPassword emailAndPassword = new EmailAndPassword();
+        emailAndPassword.setPassword("2Password");
+        Error data = given()
+                .spec(Spec.request)
+                .contentType("text/html; charset=utf-8")
+                .filter(withCustomTemplates())
+                .body(emailAndPassword.getPassword())
                 .when()
-                .post("/api/register")
+                .post("/register")
                 .then()
-                .log().status()
-                .log().body()
+                .spec(Spec.response)
                 .statusCode(400)
-                .body("error", is("Missing email or username"));
+                .extract().as(Error.class);
+        assertEquals(expectedError, data.getError());
     }
+
     @Test
-    void unsuccessfulRegistrationUnvalidEmailTest(){
-        String data = "{ \"email\": \"eve.holt\", \"password\": \"cityslicka\" }";
-        given()
-                .log().uri()
-                .log().body()
-                .baseUri(baseUrl)
-                .contentType(JSON)
-                .body(data)
+    void unsuccessfulRegistrationInvalidEmailTest() {
+        String expectedError = "Note: Only defined users succeed registration";
+        EmailAndPassword emailAndPassword = new EmailAndPassword();
+        emailAndPassword.setEmail("test");
+        emailAndPassword.setPassword("2Password");
+        Error data = given()
+                .spec(Spec.request)
+                .filter(withCustomTemplates())
+                .body(emailAndPassword)
                 .when()
-                .post("/api/register")
+                .post("/register")
                 .then()
-                .log().status()
-                .log().body()
+                .spec(Spec.response)
                 .statusCode(400)
-                .body("error", is("Note: Only defined users succeed registration"));
+                .extract().as(Error.class);
+        assertEquals(expectedError, data.getError());
     }
 }
