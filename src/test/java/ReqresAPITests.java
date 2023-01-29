@@ -3,6 +3,7 @@ import models.EmailAndPassword;
 import models.Error;
 import models.NameAndJob;
 import models.UserData;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static helpers.CustomApiListener.withCustomTemplates;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ReqresAPITests {
 
     @Test
+    @DisplayName("Get single user info")
     void singleUserTest() {
         String expectedEmail = "janet.weaver@reqres.in";
         UserData data = given()
@@ -29,6 +31,7 @@ public class ReqresAPITests {
     }
 
     @Test
+    @DisplayName("Create user")
     void createTest() {
         NameAndJob nameAndJob = new NameAndJob();
         nameAndJob.setName("Alex");
@@ -48,6 +51,7 @@ public class ReqresAPITests {
     }
 
     @Test
+    @DisplayName("Update User")
     void updateTest() {
         NameAndJob nameAndJob = new NameAndJob();
         nameAndJob.setName("AlexAlex");
@@ -67,6 +71,7 @@ public class ReqresAPITests {
     }
 
     @Test
+    @DisplayName("Unsuccessful registration due to missing password")
     void unsuccessfulRegistrationMissingPasswordTest() {
         String expectedError = "Missing email or username";
         EmailAndPassword emailAndPassword = new EmailAndPassword();
@@ -86,6 +91,7 @@ public class ReqresAPITests {
     }
 
     @Test
+    @DisplayName("Unsuccessful registration due to missing email")
     void unsuccessfulRegistrationMissingEmailTest() {
         String expectedError = "Missing email or username";
         EmailAndPassword emailAndPassword = new EmailAndPassword();
@@ -105,6 +111,7 @@ public class ReqresAPITests {
     }
 
     @Test
+    @DisplayName("Unsuccessful registration due to invalid email")
     void unsuccessfulRegistrationInvalidEmailTest() {
         String expectedError = "Note: Only defined users succeed registration";
         EmailAndPassword emailAndPassword = new EmailAndPassword();
